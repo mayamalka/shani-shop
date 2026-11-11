@@ -1,0 +1,51 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>תשלום – הדודה שני</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.lay{display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.three{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px}
+.opt{display:flex;gap:12px;align-items:center;border:2px solid var(--line);background:#fff;border-radius:16px;padding:14px;margin-bottom:10px}
+.opt.on{border-color:var(--burnt);background:#FFF4E2}
+.opt input{width:20px;height:20px;flex:none}
+.opt div{flex:1}
+.consent{display:flex;gap:10px;align-items:start;font-size:14.5px;margin:10px 0}
+.consent input{width:20px;height:20px;flex:none;margin-top:2px}
+h2{font-size:22px;margin-top:6px}
+.sec{margin-bottom:22px}
+table{width:100%;border-collapse:collapse}
+td{padding:7px 0;font-size:15px}
+td:last-child{text-align:left}
+.tot td{font-size:21px;font-weight:800;border-top:2px dashed var(--line);padding-top:12px}
+.pay{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.pay span{border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 9px;font-size:13px;font-weight:700}
+body.m .lay,body.m .two,body.m .three{grid-template-columns:1fr}
+</style></head><body>
+<main id="main" class="wrap">
+ <h1 style="margin-bottom:16px">פרטים ותשלום</h1>
+ <div class="lay">
+  <form class="card">
+   <div class="sec"><h2>פרטי המזמין/ה</h2>
+    <div class="two"><div class="field"><label>שם מלא <span class="req">*</span></label><input value="מיכל כהן" autocomplete="name"></div>
+    <div class="field"><label>טלפון <span class="req">*</span></label><input value="050-1234567" autocomplete="tel"></div></div>
+    <div class="field"><label>אימייל <span class="req">*</span></label><input value="michal@example.com" autocomplete="email"><span class="hint">לשם נשלח אישור ההזמנה והקבלה</span></div></div>
+   <div class="sec"><h2>אופן קבלה</h2>
+    <label class="opt on"><input type="radio" checked><div><b>משלוח עד הבית</b><br><span class="hint">שליח · 3–5 ימי עסקים מסיום ההכנה</span></div><b>30 ₪</b></label>
+    <label class="opt"><input type="radio"><div><b>איסוף עצמי</b><br><span class="hint">מהסטודיו בפרדס חנה – נתאם בוואטסאפ</span></div><b>חינם</b></label>
+    <div class="three"><div class="field"><label>רחוב ומספר <span class="req">*</span></label><input value="הדקל 12"></div><div class="field"><label>עיר <span class="req">*</span></label><input value="חיפה"></div><div class="field"><label>דירה</label><input value="4"></div></div></div>
+   <div class="sec"><h2>אישורים</h2>
+    <label class="consent"><input type="checkbox" checked> קראתי ואני מסכים/ה <a href="#">לתקנון</a> ול<a href="#">מדיניות הפרטיות</a> <span class="req">*</span></label>
+    <label class="consent"><input type="checkbox" checked> אני מאשר/ת שימוש בתמונות שהעליתי (כולל תמונות ילדים) אך ורק להכנת הספר, ומחיקתן 60 יום לאחר המשלוח <span class="req">*</span></label>
+    <label class="consent"><input type="checkbox"> אשמח לקבל עדכונים ומבצעים במייל (לא חובה)</label>
+    <p class="hint">ספרים בהתאמה אישית אינם ניתנים לביטול לאחר תחילת הייצור, בהתאם לחוק הגנת הצרכן.</p></div>
+  </form>
+  <aside class="card">
+   <h2>ההזמנה שלך</h2>
+   <table><tr><td>ספר מוכן 1–3 × 2</td><td>600 ₪</td></tr><tr><td>ספר בהרכבה · 12 עמ׳</td><td>354 ₪</td></tr><tr><td>משלוח</td><td>30 ₪</td></tr><tr class="tot"><td>סה״כ</td><td>984 ₪</td></tr></table>
+   <button class="btn" style="width:100%;margin-top:14px">🔒 מעבר לתשלום מאובטח</button>
+   <div class="pay"><span>Visa</span><span>Mastercard</span><span>bit</span><span>Apple Pay</span><span>Google Pay</span></div>
+   <p class="hint" style="text-align:center;margin-top:10px">התשלום מתבצע בעמוד המאובטח של חברת הסליקה. פרטי האשראי לא נשמרים אצלנו.</p>
+  </aside>
+ </div>
+</main>
+<script src="common.js"></script><script>mount('',{count:3});</script>
+</body></html>

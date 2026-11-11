@@ -1,0 +1,1 @@
+ALTER TABLE "settings" ADD COLUMN "about_image_key" text;

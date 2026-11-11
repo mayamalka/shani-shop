@@ -1,0 +1,56 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ספר מוכן לגילאי 1–3 – הדודה שני</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.pg{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:start}
+.gal .main{margin-bottom:12px}
+.thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.thumbs .felt::after{inset:4px;border-width:1px}
+.thumbs > div:first-child{outline:3px solid var(--burnt);border-radius:18px}
+.crumbs{font-size:14px;color:var(--muted);margin-bottom:8px}
+.desc{margin:12px 0 20px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.up{border:2px dashed var(--orange);border-radius:16px;background:#FFF4E2;padding:14px;display:flex;gap:12px;align-items:center;min-height:84px}
+.up .ph{width:56px;height:56px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font-size:24px;flex:none}
+.up.done .ph{background:url(logo.jpg) center/cover;}
+.up small{display:block;color:var(--muted)}
+fieldset{border:none;margin-bottom:18px}
+legend{font-family:'Varela Round';font-size:19px;color:var(--burnt);margin-bottom:10px}
+.buy{display:flex;gap:14px;align-items:center;margin-top:8px}
+.qty{display:flex;align-items:center;border:2px solid var(--line);border-radius:999px;background:#fff}
+.qty button{width:40px;height:44px;border:none;background:none;font-size:22px;color:var(--burnt)}
+.qty span{min-width:28px;text-align:center;font-weight:700}
+.consent{font-size:14px;display:flex;gap:8px;align-items:start;margin:10px 0}
+.consent input{width:20px;height:20px;flex:none;margin-top:2px}
+body.m .pg{grid-template-columns:1fr;gap:20px}
+body.m .two{grid-template-columns:1fr}
+</style></head><body>
+<main id="main" class="wrap">
+ <div class="crumbs">חנות › ספר מוכן לגילאי 1–3</div>
+ <div class="pg">
+  <div class="gal"><div class="main" data-felt="family" data-i="0"></div>
+   <div class="thumbs"><div data-felt="family" data-i="0"></div><div data-felt="sun" data-i="5"></div><div data-felt="fish" data-i="3"></div><div data-felt="apple" data-i="2"></div><div data-felt="car" data-i="4"></div></div></div>
+  <div>
+   <h1>ספר מוכן לגילאי 1–3</h1>
+   <div class="price" style="font-size:26px;margin-top:6px">300 ₪</div>
+   <p class="desc">12 עמודי לבד רכים: משפחה, צבעים, צורות, חיות ומגע. העמוד הראשון והאחרון נתפרים עם התמונות והשמות שלכם.</p>
+   <form class="card">
+    <fieldset><legend>שמות</legend>
+     <div class="two"><div class="field"><label>שם הילד/ה <span class="req">*</span></label><input value="נועם"></div>
+     <div class="field"><label>שם אמא</label><input value="מיכל"></div></div>
+     <div class="field" style="max-width:50%"><label>שם אבא</label><input value="יואב"></div>
+    </fieldset>
+    <fieldset><legend>תמונות</legend>
+     <div class="two">
+      <div class="up done"><div class="ph"></div><div><b>תמונת הילד/ה ✓</b><small>noam.jpg · 2.1MB · <a href="#">החלפה</a></small></div></div>
+      <div class="up"><div class="ph">📷</div><div><b>תמונת ההורים</b><small>JPG/PNG עד 10MB · לחצו או גררו לכאן</small></div></div>
+     </div>
+     <p class="hint" style="margin-top:8px">התמונות משמשות רק להכנת הספר ונמחקות 60 יום אחרי המשלוח.</p>
+    </fieldset>
+    <label class="consent"><input type="checkbox" checked> אני מאשר/ת שימוש בתמונות לצורך הכנת הספר בהתאם <a href="#">למדיניות הפרטיות</a></label>
+    <div class="buy"><div class="qty" aria-label="כמות"><button>+</button><span>1</span><button>−</button></div><button class="btn" style="flex:1">הוספה לסל · 300 ₪</button></div>
+   </form>
+  </div>
+ </div>
+</main>
+<script src="common.js"></script><script>mount('shop',{count:1});</script>
+</body></html>

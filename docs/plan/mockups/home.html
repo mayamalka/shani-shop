@@ -1,0 +1,55 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>הדודה שני – ספרי לבד בעבודת יד</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center;background:var(--paper);border:3px dashed var(--soft);border-radius:60px 60px 60px 60px;padding:48px 56px;position:relative}
+.hero p{font-size:20px;margin:16px 0 28px;max-width:520px}
+.hero .art{display:grid;grid-template-columns:1fr 1fr;gap:16px;transform:rotate(-3deg)}
+.deco{position:absolute;font-size:30px;color:var(--sun)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:20px}
+.pc .felt{margin-bottom:14px;aspect-ratio:4/3}
+.pc h3{margin-bottom:6px}
+.pc p{font-size:15px;color:var(--muted);margin-bottom:12px;min-height:44px}
+.row{display:flex;justify-content:space-between;align-items:center}
+.why{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:40px;text-align:center}
+.why .card{padding:18px}
+.why b{display:block;font-size:30px;color:var(--orange)}
+.cookie{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:3px dashed var(--orange);padding:20px 40px;display:flex;gap:24px;align-items:center;box-shadow:0 -6px 20px rgba(90,58,34,.15)}
+.cookie p{flex:1;font-size:15px}
+.cookie .btns{display:flex;gap:10px;flex-wrap:wrap}
+.cookie .btn{padding:10px 18px;font-size:15px}
+body.m .hero{grid-template-columns:1fr;padding:24px 20px;border-radius:32px}
+body.m .hero p{font-size:17px}
+body.m .grid3{grid-template-columns:1fr}
+body.m .why{grid-template-columns:1fr 1fr}
+body.m .cookie{flex-direction:column;align-items:stretch;padding:16px}
+body.m .cookie .btns{flex-direction:column}
+</style></head><body>
+<main id="main" class="wrap">
+  <section class="hero">
+    <div>
+      <span class="pill">✂️ בעבודת יד, באהבה</span>
+      <h1 style="margin-top:12px">ספרי לבד אישיים<br>שמלמדים, מרגיעים ומצחיקים</h1>
+      <p>ספרים רכים ממשי בד, עם התמונות והשמות של המשפחה שלכם – לפיתוח מוטוריקה עדינה, שפה וזיכרון, לגילאי 1–5.</p>
+      <a class="btn" href="#">לחנות ←</a> <a class="btn sec" href="#">הכירו את שני</a>
+    </div>
+    <div class="art"><div data-felt="family" data-i="0"></div><div data-felt="sun" data-i="5"></div><div data-felt="tree" data-i="2"></div><div data-felt="heart" data-i="4"></div></div>
+  </section>
+  <h2 style="margin-top:44px">הספרים שלנו</h2>
+  <div class="grid3">
+    <article class="card pc"><div data-felt="balloon" data-i="1"></div><h3>ספר מוכן לגילאי 1–3</h3><p>עמודי מגע, צבעים וצורות – עם תמונות ושמות המשפחה.</p><div class="row"><span class="price">300 ₪</span><a class="btn" href="#">לפרטים</a></div></article>
+    <article class="card pc"><div data-felt="house" data-i="3"></div><h3>ספר מוכן לגילאי 3–5</h3><p>רוכסנים, כפתורים, ספירה ושעון – אתגרים לידיים קטנות.</p><div class="row"><span class="price"><span class="new">270 ₪</span><s>300 ₪</s></span><a class="btn" href="#">לפרטים</a></div></article>
+    <article class="card pc"><div data-felt="book" data-i="6"></div><h3>ספר בהרכבה אישית</h3><p>בחרו 10–15 עמודים מתוך הקטלוג, לפי גיל ותחומי עניין.</p><div class="row"><span class="price">החל מ־300 ₪</span><a class="btn" href="#">להרכבה</a></div></article>
+  </div>
+  <div class="why">
+    <div class="card"><b>✋</b>מוטוריקה עדינה</div><div class="card"><b>💬</b>שפה ושיום</div><div class="card"><b>👨‍👩‍👧</b>זהות ומשפחה</div><div class="card"><b>🧵</b>תפור ביד בישראל</div>
+  </div>
+</main>
+<div id="cookie"></div>
+<script src="common.js"></script>
+<script>
+mount('home');
+if (new URLSearchParams(location.search).get('cookie')==='1') document.querySelector('.a11y').style.display='none', document.getElementById('cookie').outerHTML =
+`<section class="cookie" role="dialog" aria-label="הסכמה לעוגיות"><p><b>🍪 אנחנו משתמשים בעוגיות</b><br>עוגיות הכרחיות מפעילות את האתר והסל. בהסכמתכם נשתמש גם בעוגיות סטטיסטיקה (Google Analytics) ושיווק (Meta, TikTok) לשיפור האתר והפרסום. <a href="#">מדיניות פרטיות</a></p>
+<div class="btns"><button class="btn">אישור הכל</button><button class="btn sec">הכרחיות בלבד</button><button class="btn sec">התאמה אישית</button></div></section>`;
+</script>
+</body></html>

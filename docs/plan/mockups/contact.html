@@ -1,0 +1,33 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>צור קשר – הדודה שני</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.lay{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:start}
+.soc{display:flex;flex-direction:column;gap:12px}
+.sbtn{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:18px;color:#fff;text-decoration:none;font-weight:700;font-size:18px}
+.sbtn svg{width:30px;height:30px;fill:#fff;flex:none}
+.sbtn small{display:block;font-weight:400;font-size:14px;opacity:.95}
+.wa{background:#1E7E45}.ig{background:#B0306A}.tt{background:#111}
+.consent{display:flex;gap:10px;align-items:start;font-size:14.5px;margin:4px 0 14px}
+.consent input{width:20px;height:20px;flex:none;margin-top:2px}
+body.m .lay{grid-template-columns:1fr}
+</style></head><body>
+<main id="main" class="wrap">
+ <h1>צור קשר</h1><p style="margin:6px 0 20px">שאלה על ספר, הזמנה מיוחדת או סתם להגיד שלום? נשמח לשמוע 💛</p>
+ <div class="lay">
+  <form class="card">
+   <div class="field"><label>נושא הפנייה <span class="req">*</span></label><input value="שאלה לגבי ספר לתאומים"></div>
+   <div class="field"><label>אימייל לחזרה <span class="req">*</span></label><input value="dana@example.com"></div>
+   <div class="field"><label>תוכן הפנייה <span class="req">*</span></label><textarea rows="5">היי שני, אפשר להכין ספר אחד עם שני ילדים? תודה!</textarea></div>
+   <label class="consent"><input type="checkbox" checked> אני מסכים/ה שפרטיי ישמשו למענה על הפנייה בלבד (<a href="#">מדיניות פרטיות</a>)</label>
+   <button class="btn">שליחה ✉️</button>
+  </form>
+  <div class="soc">
+   <a class="sbtn wa"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .3-3.4-.7-2.9-1.2-4.7-4.1-4.9-4.3-.1-.2-1.2-1.6-1.2-3s.8-2.2 1-2.5c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2.1 1.3 2.4 1.4.3.2.5.1.6 0l.9-1c.2-.3.4-.2.6-.1l2 .9c.3.1.5.2.5.3.1.1.1.7-.2 1.5z"/></svg><span>שליחת הודעה בוואטסאפ<small>נפתח עם הודעה מוכנה: ״היי שני, הגעתי מהאתר ואשמח לשמוע על ספרי הלבד״</small></span></a>
+   <a class="sbtn ig"><svg viewBox="0 0 24 24"><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zM17.3 5.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4zM12 2c-2.7 0-3 0-4.1.1C4.2 2.3 2.3 4.2 2.1 7.9 2 9 2 9.3 2 12s0 3 .1 4.1c.2 3.7 2.1 5.6 5.8 5.8 1.1.1 1.4.1 4.1.1s3 0 4.1-.1c3.7-.2 5.6-2.1 5.8-5.8.1-1.1.1-1.4.1-4.1s0-3-.1-4.1c-.2-3.7-2.1-5.6-5.8-5.8C15 2 14.7 2 12 2z"/></svg><span>אינסטגרם<small>@hadoda.shani</small></span></a>
+   <a class="sbtn tt"><svg viewBox="0 0 24 24"><path d="M16.6 2h-3.3v13.2a2.9 2.9 0 1 1-2-2.8V9a6.2 6.2 0 1 0 5.3 6.2V8.4a7.5 7.5 0 0 0 4.4 1.4V6.5a4.3 4.3 0 0 1-4.4-4.5z"/></svg><span>טיקטוק<small>@hadoda.shani</small></span></a>
+   <div class="card" style="font-size:15px"><b>⏰ זמני מענה</b><br>א׳–ה׳ 9:00–17:00 · עד יום עסקים אחד</div>
+  </div>
+ </div>
+</main>
+<script src="common.js"></script><script>mount('contact',{count:0});</script>
+</body></html>

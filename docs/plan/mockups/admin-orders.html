@@ -1,0 +1,44 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>הזמנות – ניהול</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.lay{display:grid;grid-template-columns:1.25fr 1fr;gap:24px;align-items:start}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.tab{border:2px solid var(--line);background:#fff;border-radius:999px;padding:5px 14px;font-weight:500;font-size:15px}
+.tab.on{background:var(--burnt);color:#fff;border-color:var(--burnt)}
+.tab b{background:var(--soft);color:var(--brown);border-radius:999px;padding:0 7px;font-size:12px;margin-inline-start:4px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{text-align:right;font-weight:500;color:var(--muted);padding:8px;border-bottom:2px dashed var(--line)}
+td{padding:11px 8px;border-bottom:1px solid #F6E8CC}
+tr.on td{background:#FFF4E2}
+.st{border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+.paid{background:#E3F1FF;color:#174D8C}.prog{background:#FFF1C9;color:#7A5200}.ship{background:#DDF3E2;color:#1E6B35}.new{background:#F2E6FF;color:#5B2F91}
+.det h3{margin:14px 0 6px;color:var(--burnt)}
+.kv{font-size:15px;line-height:1.75}
+.ph{display:flex;gap:8px;margin-top:6px}
+.ph span{width:64px;height:64px;border-radius:12px;background:url(logo.jpg) center/cover;border:2px solid var(--line)}
+.acts{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.search{max-width:280px}
+</style></head><body>
+<main id="main" class="wrap" style="max-width:1340px">
+ <div style="display:flex;justify-content:space-between;align-items:end"><h1>הזמנות</h1><input class="search" placeholder="🔍 חיפוש לפי שם / מספר הזמנה"></div>
+ <div class="tabs" role="tablist" aria-label="סינון לפי סטטוס"><span class="tab">הכל<b>14</b></span><span class="tab on">שולמו – ממתינות<b>4</b></span><span class="tab">בטיפול<b>5</b></span><span class="tab">יצאו למשלוח<b>3</b></span><span class="tab">הושלמו<b>2</b></span></div>
+ <div class="lay">
+  <section class="card" style="padding:12px">
+   <table><thead><tr><th>#</th><th>לקוח/ה</th><th>תאריך</th><th>פריטים</th><th>סה״כ</th><th>סטטוס</th></tr></thead><tbody>
+    <tr class="on"><td>1042</td><td>מיכל כהן</td><td>08/11</td><td>3</td><td>984 ₪</td><td><span class="st paid">שולם</span></td></tr>
+    <tr><td>1041</td><td>אורית לוי</td><td>07/11</td><td>1</td><td>300 ₪</td><td><span class="st paid">שולם</span></td></tr>
+    <tr><td>1039</td><td>רון אברהם</td><td>06/11</td><td>1</td><td>411 ₪</td><td><span class="st paid">שולם</span></td></tr>
+    <tr><td>1036</td><td>נגה פרץ</td><td>04/11</td><td>2</td><td>630 ₪</td><td><span class="st paid">שולם</span></td></tr>
+   </tbody></table></section>
+  <section class="card det" aria-label="פרטי הזמנה 1042">
+   <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">הזמנה #1042</h2><span class="st paid">שולם</span></div>
+   <div class="kv"><b>מיכל כהן</b> · 050-1234567 · michal@example.com<br>משלוח: הדקל 12 דירה 4, חיפה · 30 ₪</div>
+   <h3>ספר מוכן 1–3 × 2</h3><div class="kv">שמות: נועם (ילד) · מיכל · יואב</div><div class="ph"><span></span><span></span></div>
+   <h3>ספר בהרכבה · 12 עמודים</h3><div class="kv">שמות: אורי · דנה · רון<br>עמודים: המשפחה שלי, מזג אוויר, אקווריום, רכב עם רוכסן, עץ התפוחים, הבית שלי, …</div>
+   <div class="acts"><button class="btn">סימון ״בטיפול״</button><button class="btn sec">סימון ״יצא למשלוח״</button><button class="btn sec">⬇ הורדת תמונות</button></div>
+   <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-weight:400;font-size:14px"><input type="checkbox" checked style="width:18px;height:18px"> לשלוח ללקוחה מייל עדכון סטטוס</label>
+  </section>
+ </div>
+</main>
+<script src="common.js"></script><script>mount('orders',{admin:true,count:0,noFooter:true});</script>
+</body></html>

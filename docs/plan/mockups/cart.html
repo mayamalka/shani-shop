@@ -1,0 +1,49 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>סל הקניות – הדודה שני</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.lay{display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start}
+.item{display:grid;grid-template-columns:130px 1fr auto;gap:18px;align-items:start;padding:18px 0;border-bottom:2px dashed var(--line)}
+.item:last-child{border:none}
+.item h3{margin-bottom:4px}
+.opts{font-size:14.5px;color:var(--muted);line-height:1.6}
+.opts b{color:var(--brown);font-weight:500}
+.ph{display:inline-flex;gap:6px;vertical-align:middle}
+.ph span{width:30px;height:30px;border-radius:8px;background:url(logo.jpg) center/cover;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.side{display:flex;flex-direction:column;align-items:end;gap:12px}
+.qty{display:flex;align-items:center;border:2px solid var(--line);border-radius:999px;background:#fff}
+.qty button{width:38px;height:40px;border:none;background:none;font-size:20px;color:var(--burnt)}
+.qty span{min-width:26px;text-align:center;font-weight:700}
+.rm{background:none;border:none;color:var(--red);font-family:inherit;font-size:14px;text-decoration:underline}
+.edit{font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:16px}
+td{padding:8px 0}
+td:last-child{text-align:left}
+.tot td{font-size:22px;font-weight:800;border-top:2px dashed var(--line);padding-top:12px}
+.ship label{display:flex;gap:8px;align-items:center;font-weight:400;margin:6px 0}
+.ship input{width:18px;height:18px}
+body.m .lay{grid-template-columns:1fr}
+body.m .item{grid-template-columns:84px 1fr}
+body.m .side{grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center}
+</style></head><body>
+<main id="main" class="wrap">
+ <h1 style="margin-bottom:18px">סל הקניות <span style="font-size:20px;color:var(--muted)">(3 פריטים)</span></h1>
+ <div class="lay">
+  <section class="card" aria-label="פריטים בסל">
+   <div class="item"><div data-felt="balloon" data-i="1"></div>
+    <div><h3>ספר מוכן לגילאי 1–3</h3><div class="opts"><b>שמות:</b> נועם · מיכל · יואב<br><b>תמונות:</b> <span class="ph"><span></span><span></span></span><br><a class="edit" href="#">עריכת התאמה אישית</a></div></div>
+    <div class="side"><span class="price">600 ₪</span><div class="qty" aria-label="כמות"><button aria-label="הוספה">+</button><span>2</span><button aria-label="הפחתה">−</button></div><button class="rm">הסרה</button></div></div>
+   <div class="item"><div data-felt="book" data-i="6"></div>
+    <div><h3>ספר בהרכבה אישית · 12 עמודים</h3><div class="opts"><b>שמות:</b> אורי · דנה · רון<br><b>תמונות:</b> <span class="ph"><span></span><span></span></span><br><b>עמודים:</b> המשפחה שלי, מזג אוויר, אקווריום, רכב עם רוכסן, עץ התפוחים, הבית שלי ועוד 6<br><a class="edit" href="#">עריכת עמודים</a></div></div>
+    <div class="side"><span class="price">354 ₪</span><div class="qty"><button>+</button><span>1</span><button>−</button></div><button class="rm">הסרה</button></div></div>
+  </section>
+  <aside class="card">
+   <h2>סיכום הזמנה</h2>
+   <table><tr><td>סכום ביניים</td><td>954 ₪</td></tr><tr><td>משלוח</td><td>30 ₪</td></tr><tr class="tot"><td>סה״כ לתשלום</td><td>984 ₪</td></tr></table>
+   <p class="hint" style="margin:6px 0 16px">עוסק פטור – המחיר אינו כולל מע״מ</p>
+   <a class="btn" style="width:100%">המשך לתשלום ←</a>
+   <a class="btn sec" style="width:100%;margin-top:10px">המשך קנייה</a>
+  </aside>
+ </div>
+</main>
+<script src="common.js"></script><script>mount('',{count:3});</script>
+</body></html>

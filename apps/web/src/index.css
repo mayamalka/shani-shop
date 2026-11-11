@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+@import '@fontsource/rubik/hebrew-400.css';
+@import '@fontsource/rubik/hebrew-500.css';
+@import '@fontsource/rubik/hebrew-700.css';
+@import '@fontsource/rubik/latin-400.css';
+@import '@fontsource/rubik/latin-700.css';
+@import '@fontsource/varela-round/hebrew-400.css';
+@import '@fontsource/varela-round/latin-400.css';
+
+/* Brand tokens taken from the logo. Text colors are checked for WCAG AA contrast on cream/white. */
+@theme {
+  --color-cream: #fff8ec;
+  --color-paper: #fffdf8;
+  --color-orange: #f28c28; /* decoration only – too light for text */
+  --color-burnt: #b5541e; /* headings, buttons (4.9:1 on cream) */
+  --color-burnt-dark: #8f4116;
+  --color-sun: #f8c33a; /* decoration only */
+  --color-soft: #fbe3a0;
+  --color-brown: #5a3a22; /* body text */
+  --color-muted: #7a5a40; /* secondary text (5.9:1 on cream) */
+  --color-sale: #c62828; /* discount prices */
+  --color-line: #f3d9a8;
+  --color-ok: #1e6b35;
+  --color-wa: #1e7e45;
+  --font-sans: 'Rubik', system-ui, sans-serif;
+  --font-round: 'Varela Round', 'Rubik', system-ui, sans-serif;
+  --radius-card: 22px;
+}
+
+@layer base {
+  html {
+    font-size: calc(100% * var(--text-scale, 1));
+    background: var(--color-cream);
+  }
+  body {
+    @apply bg-cream text-brown font-sans leading-relaxed antialiased;
+    min-height: 100dvh;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-round text-burnt;
+  }
+  h1 {
+    @apply text-3xl md:text-4xl leading-tight;
+  }
+  h2 {
+    @apply text-2xl leading-snug;
+  }
+  h3 {
+    @apply text-lg;
+  }
+  /* links inside text are underlined, not only colored (WCAG 1.4.1); buttons/nav opt out with no-underline */
+  a {
+    @apply text-burnt underline underline-offset-2;
+  }
+  :focus-visible {
+    outline: 3px solid #1f4e9a;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  [hidden] {
+    display: none !important;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-paper rounded-[var(--radius-card)] border-2 border-dashed border-line p-5;
+    box-shadow: 0 4px 0 #f6e3bd;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-burnt px-6 py-3 font-bold text-white no-underline transition-colors;
+    @apply hover:bg-burnt-dark disabled:cursor-not-allowed disabled:opacity-60;
+    min-height: 44px;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-burnt bg-white px-6 py-2.5 font-bold text-burnt no-underline;
+    @apply hover:bg-cream disabled:cursor-not-allowed disabled:opacity-60;
+    min-height: 44px;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-sale bg-white px-5 py-2 font-bold text-sale;
+    min-height: 44px;
+  }
+  .btn-sm {
+    @apply px-4 py-1.5 text-sm;
+    min-height: 36px;
+  }
+  .input {
+    @apply w-full rounded-2xl border-2 border-[#e8c99a] bg-white px-4 py-2.5 text-brown;
+  }
+  .input[aria-invalid='true'] {
+    @apply border-sale;
+  }
+  .label {
+    @apply mb-1.5 block font-medium;
+  }
+  .hint {
+    @apply text-sm text-muted;
+  }
+  .error-text {
+    @apply mt-1 block text-sm font-medium text-sale;
+  }
+  .pill {
+    @apply inline-block rounded-full bg-soft px-3 py-0.5 text-sm font-medium text-brown;
+  }
+  .chip {
+    @apply rounded-full border-2 border-line bg-white px-4 py-1.5 font-medium text-brown;
+    min-height: 40px;
+  }
+  .chip[aria-pressed='true'],
+  .chip[aria-current='page'] {
+    @apply border-sun bg-soft;
+  }
+  .stitch {
+    @apply border-2 border-dashed border-line;
+  }
+  .sr-only-focusable:not(:focus) {
+    @apply sr-only;
+  }
+}
+
+/* ---- accessibility menu options (set on <html>) ---- */
+html.a11y-contrast {
+  --color-cream: #ffffff;
+  --color-paper: #ffffff;
+  --color-burnt: #7a2e00;
+  --color-brown: #000000;
+  --color-muted: #2b2b2b;
+  --color-line: #000000;
+}
+html.a11y-contrast .card {
+  box-shadow: none;
+}
+html.a11y-underline a {
+  text-decoration: underline !important;
+}
+html.a11y-reduce-motion *,
+html.a11y-reduce-motion *::before,
+html.a11y-reduce-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

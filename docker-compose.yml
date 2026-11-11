@@ -1,0 +1,28 @@
+# Local services for development: `docker compose up -d`
+#   PostgreSQL → localhost:5432 (user/password/db: shani)
+#   Mailpit    → SMTP localhost:1025, web inbox http://localhost:8025 (set EMAIL_TRANSPORT=smtp in .env)
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: shani
+      POSTGRES_PASSWORD: shani
+      POSTGRES_DB: shani
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U shani']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:v1.24
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
+volumes:
+  pgdata:

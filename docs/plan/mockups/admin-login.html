@@ -1,0 +1,29 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>כניסת מנהלת – הדודה שני</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.lay{display:grid;grid-template-columns:1fr 1fr;gap:28px;max-width:940px;margin:20px auto}
+.stepn{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--soft);font-weight:800;margin-inline-end:8px}
+.on .stepn{background:var(--burnt);color:#fff}
+.code{display:flex;gap:10px;justify-content:center;direction:ltr;margin:18px 0}
+.code span{width:48px;height:58px;border:2px solid #E8C99A;border-radius:12px;background:#fff;display:grid;place-items:center;font-size:26px;font-weight:800}
+.code span.f{border-color:var(--burnt)}
+.done{opacity:.55}
+body.m .lay{grid-template-columns:1fr}
+</style></head><body>
+<main id="main" class="wrap">
+ <h1 style="text-align:center">כניסת מנהלת 🔐</h1>
+ <div class="lay">
+  <section class="card done"><h2><span class="stepn">1</span>סיסמה</h2>
+   <div class="field"><label>אימייל</label><input value="shani@hadoda.co.il"></div>
+   <div class="field"><label>סיסמה</label><input type="password" value="**************"></div>
+   <button class="btn" style="width:100%">המשך ✓</button>
+   <p class="hint" style="margin-top:10px">5 ניסיונות שגויים → נעילה ל־15 דקות</p></section>
+  <section class="card on"><h2><span class="stepn">2</span>קוד מאפליקציית האימות</h2>
+   <p>פתחי את Google Authenticator / Microsoft Authenticator והקלידי את הקוד בן 6 הספרות של ״הדודה שני״.</p>
+   <div class="code" aria-label="קוד אימות"><span>4</span><span>8</span><span>2</span><span class="f">1</span><span></span><span></span></div>
+   <button class="btn" style="width:100%">כניסה</button>
+   <p style="margin-top:12px;font-size:14px;text-align:center"><a href="#">אין גישה לטלפון? כניסה עם קוד גיבוי</a></p></section>
+ </div>
+</main>
+<script src="common.js"></script><script>mount('',{count:0,noFooter:true});</script>
+</body></html>

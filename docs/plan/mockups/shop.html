@@ -1,0 +1,30 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>חנות – הדודה שני</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.top{display:flex;justify-content:space-between;align-items:end;margin-bottom:20px;gap:16px}
+.filters{display:flex;gap:10px}
+.chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:6px 16px;font-weight:500}
+.chip.on{background:var(--soft);border-color:var(--sun)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.pc .felt{aspect-ratio:4/3;margin-bottom:12px}
+.pc h3{margin:6px 0}
+.pc p{font-size:15px;color:var(--muted);margin-bottom:12px}
+.row{display:flex;justify-content:space-between;align-items:center}
+.sale{position:absolute;top:14px;right:14px;background:var(--red);color:#fff;border-radius:999px;padding:4px 12px;font-weight:700;font-size:14px;z-index:2}
+.pc{position:relative}
+body.m .grid{grid-template-columns:1fr}
+body.m .top{flex-direction:column;align-items:start}
+body.m .filters{flex-wrap:wrap}
+</style></head><body>
+<main id="main" class="wrap">
+  <div class="top"><div><h1>החנות</h1><p>כל ספר נתפר במיוחד עבורכם · זמן הכנה כ־3 שבועות</p></div>
+  <div class="filters" role="group" aria-label="סינון לפי גיל"><span class="chip on">הכל</span><span class="chip">1–3</span><span class="chip">3–5</span><span class="chip">הרכבה אישית</span></div></div>
+  <div class="grid">
+    <article class="card pc"><div data-felt="balloon" data-i="1"></div><span class="pill">גילאי 1–3</span><h3>ספר מוכן לגילאי 1–3</h3><p>12 עמודי מגע, צבעים וצורות עם תמונות המשפחה.</p><div class="row"><span class="price">300 ₪</span><a class="btn">לפרטים</a></div></article>
+    <article class="card pc"><span class="sale">מבצע</span><div data-felt="house" data-i="3"></div><span class="pill">גילאי 3–5</span><h3>ספר מוכן לגילאי 3–5</h3><p>רוכסנים, כפתורים, ספירה ושעון – אתגרים לידיים קטנות.</p><div class="row"><span class="price"><span class="new">270 ₪</span> <s>300 ₪</s></span><a class="btn">לפרטים</a></div></article>
+    <article class="card pc"><div data-felt="book" data-i="6"></div><span class="pill">1–5 · בחירה חופשית</span><h3>ספר בהרכבה אישית</h3><p>בחרו 10–15 עמודים מהקטלוג, כל עמוד עם תמונה והסבר.</p><div class="row"><span class="price">החל מ־300 ₪</span><a class="btn">להרכבה</a></div></article>
+    <article class="card pc"><div data-felt="star" data-i="5"></div><span class="pill">מוצר חדש</span><h3>מחזיק מוצץ מלבד</h3><p>מוצר פשוט שנוסף ע״י המנהלת – ללא התאמה אישית.</p><div class="row"><span class="price">60 ₪</span><a class="btn">לפרטים</a></div></article>
+  </div>
+</main>
+<script src="common.js"></script><script>mount('shop');</script>
+</body></html>

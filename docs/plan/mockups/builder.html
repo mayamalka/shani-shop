@@ -1,0 +1,67 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ספר בהרכבה אישית – הדודה שני</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.steps{display:flex;gap:10px;margin:10px 0 22px;flex-wrap:wrap}
+.steps span{border-radius:999px;padding:6px 16px;background:#fff;border:2px solid var(--line);font-weight:500}
+.steps .on{background:var(--burnt);color:#fff;border-color:var(--burnt)}
+.steps .ok{background:var(--soft)}
+.lay{display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start}
+.bar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:5px 14px;font-weight:500;font-size:15px}
+.chip.on{background:var(--soft);border-color:var(--sun)}
+.pages{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pgc{background:var(--paper);border:2px solid var(--line);border-radius:20px;padding:12px;position:relative}
+.pgc.sel{border:3px solid var(--burnt);background:#FFF4E2}
+.pgc .felt{aspect-ratio:4/3;margin-bottom:8px}
+.pgc h3{font-size:17px}
+.pgc p{font-size:13.5px;color:var(--muted);line-height:1.4;margin:4px 0 8px}
+.tick{position:absolute;top:18px;left:18px;width:32px;height:32px;border-radius:50%;background:#fff;border:2px solid var(--burnt);display:grid;place-items:center;font-weight:800;color:#fff;z-index:2}
+.sel .tick{background:var(--burnt)}
+.sum{position:sticky;top:16px}
+.count{font-size:42px;font-weight:800;color:var(--burnt);font-family:'Varela Round'}
+.meter{height:12px;border-radius:999px;background:#F6E3BD;overflow:hidden;margin:8px 0 4px;position:relative}
+.meter i{display:block;height:100%;width:80%;background:linear-gradient(90deg,var(--orange),var(--sun))}
+table{width:100%;border-collapse:collapse;font-size:15px;margin:14px 0}
+td{padding:6px 0;border-bottom:1px dashed var(--line)}
+td:last-child{text-align:left}
+.tot td{font-weight:800;font-size:19px;border:none;padding-top:10px}
+.mini{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.mini span{width:34px;height:34px;border-radius:8px;display:inline-block}
+body.m .lay{grid-template-columns:1fr}
+body.m .pages{grid-template-columns:1fr 1fr}
+body.m .sum{position:fixed;bottom:0;left:0;right:0;top:auto;border-radius:22px 22px 0 0;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:5}
+body.m .sum .desk{display:none}
+body.m .count{font-size:26px}
+.mob{display:none}
+body.m .mob{display:block}
+body.m .pgc p{display:none}
+</style></head><body>
+<main id="main" class="wrap">
+ <h1>ספר בהרכבה אישית</h1>
+ <div class="steps"><span class="ok">1. פרטים ותמונות ✓</span><span class="on">2. בחירת עמודים</span><span>3. סיכום</span></div>
+ <div class="lay">
+  <section>
+   <div class="bar"><b>סינון לפי גיל:</b><span class="chip on">הכל</span><span class="chip">1–2</span><span class="chip">2–3</span><span class="chip">3–4</span><span class="chip">4–5</span></div>
+   <div class="pages" id="pages"></div>
+  </section>
+  <aside class="card sum" aria-live="polite">
+   <div><div class="desk hint">עמודים שנבחרו</div><span class="count">12</span><span> / 15</span><div class="desk meter"><i></i></div><div class="desk hint">מינימום 10 · מקסימום 15</div></div>
+   <div class="desk"><table>
+    <tr><td>עמודים 1–10 × 30 ₪</td><td>300 ₪</td></tr>
+    <tr><td>עמודים 11–12 × 27 ₪</td><td>54 ₪</td></tr>
+    <tr><td style="color:var(--muted)">עמודים 14–15 × 25 ₪</td><td style="color:var(--muted)">—</td></tr>
+    <tr class="tot"><td>סה״כ</td><td>354 ₪</td></tr></table>
+    <div class="hint">עוד עמוד אחד = 27 ₪ בלבד 🎉</div>
+    <div class="mini" id="mini"></div></div>
+   <div class="mob"><b style="font-size:20px">354 ₪</b></div>
+   <button class="btn" style="margin-top:14px">המשך לסיכום ←</button>
+  </aside>
+ </div>
+</main>
+<script src="common.js"></script><script>
+const P=[['family','המשפחה שלי','תמונות ההורים והילד עם השמות – זיהוי ושיום','1–5',1],['sun','מזג אוויר','מדביקים שמש, ענן וגשם על סקוטש','2–4',1],['fish','אקווריום','דגים על חוט מחליקים – מעקב עין־יד','1–3',1],['car','רכב עם רוכסן','פותחים רוכסן ומגלים מי נוסע','3–5',1],['apple','עץ התפוחים','קוטפים ומונים תפוחים 1–5','3–5',1],['flower','גינה בכפתורים','מכפתרים פרחים – מוטוריקה עדינה','3–5',0],['house','הבית שלי','דלתות וחלונות נפתחים – מה מסתתר?','1–3',1],['balloon','בלונים וצבעים','התאמת צבעים ושיום','1–3',0],['tree','ארבע עונות','מלבישים את העץ לפי העונה','4–5',0]];
+document.getElementById('pages').innerHTML=P.map(([a,t,d,age,s],i)=>`<article class="pgc ${s?'sel':''}"><span class="tick">${s?'✓':''}</span>${felt(a,i)}<h3>${t}</h3><p>${d}</p><span class="pill">גיל ${age}</span></article>`).join('');
+document.getElementById('mini').innerHTML=P.filter(p=>p[4]).map((p,i)=>`<span style="background:${BG[i%8]}"></span>`).join('');
+mount('shop',{count:1});
+</script>
+</body></html>

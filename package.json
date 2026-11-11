@@ -1,0 +1,50 @@
+{
+  "name": "hadoda-shani",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Hadoda Shani – online shop for custom handmade felt books",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm run build -w @shani/api && npm run build -w @shani/web",
+    "start": "npm run start -w @shani/api",
+    "db:local": "node scripts/local-db.mjs",
+    "db:push": "npm run db:push -w @shani/api",
+    "db:migrate": "npm run db:migrate -w @shani/api",
+    "db:seed": "npm run db:seed -w @shani/api",
+    "db:reset": "npm run db:reset -w @shani/api",
+    "create-admin": "npm run create-admin -w @shani/api --",
+    "typecheck": "tsc -p tsconfig.json && npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "test": "npm run test --workspaces --if-present",
+    "test:unit": "npm run test -w @shani/shared && npm run test -w @shani/web && npm run test:unit -w @shani/api",
+    "test:e2e": "playwright test",
+    "test:all": "npm run typecheck && npm run lint && npm test && npm run test:e2e",
+    "addresses:update": "node scripts/update-addresses.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@eslint/js": "^9.20.0",
+    "@playwright/test": "^1.52.0",
+    "embedded-postgres": "17.10.0-beta.17",
+    "eslint": "^9.20.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.0.0",
+    "otplib": "^12.0.1",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.30.0"
+  },
+  "allowScripts": {
+    "@embedded-postgres/linux-x64": true,
+    "argon2": true,
+    "esbuild": true,
+    "sharp": true
+  }
+}
