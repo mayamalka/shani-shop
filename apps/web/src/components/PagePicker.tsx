@@ -64,8 +64,9 @@ export function PagePicker({ pages, selected, onChange, max, error }: { pages: P
                 <span className="mb-2 block aspect-[4/3] overflow-hidden rounded-2xl bg-soft">
                   {p.imageUrl && <img src={p.imageUrl} alt="" loading="lazy" className="h-full w-full object-cover" width={400} height={300} />}
                 </span>
-                <span className="block font-round text-[1.05rem] font-bold text-burnt">{p.title}</span>
-                <span className="my-1 block text-sm leading-snug text-muted">{p.summary}</span>
+                {/* wrap-anywhere: a long word (e.g. a code or number in the title) must wrap, not push the 2-column grid past a 320px screen */}
+                <span className="block font-round text-[1.05rem] font-bold text-burnt wrap-anywhere">{p.title}</span>
+                <span className="my-1 block text-sm leading-snug text-muted wrap-anywhere">{p.summary}</span>
                 <span className="pill text-xs">{ageRangeLabel(p.minAge, p.maxAge)}</span>
               </label>
             </li>
