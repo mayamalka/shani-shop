@@ -1,0 +1,159 @@
+# Monthly restore drill: proves the R2 backups can really be restored.
+# Builds a throwaway database "shani-db-drill" from the backups (base backup + WAL), compares it with the live
+# database, deletes it, and pings healthchecks.io on success. If the ping doesn't arrive, healthchecks.io
+# emails you (dead man's switch) – so a broken backup, expired R2 key or failed restore can't go unnoticed.
+# Uses the last 50 GB of the free 200 GB block storage for ~15 minutes.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: restore-drill
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: restore-drill
+rules:
+  - apiGroups: [postgresql.cnpg.io]
+    resources: [clusters]
+    verbs: [get, list, watch, create, delete]
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list]
+  - apiGroups: [""]
+    resources: [pods/exec]
+    verbs: [create]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: restore-drill
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: restore-drill
+subjects:
+  - kind: ServiceAccount
+    name: restore-drill
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: restore-drill
+data:
+  drill.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    DRILL=shani-db-drill
+    IMAGE=$(kubectl get cluster shani-db -o jsonpath='{.spec.imageName}')
+
+    cleanup() { kubectl delete cluster "$DRILL" --ignore-not-found --wait=false; }
+    trap cleanup EXIT
+    kubectl delete cluster "$DRILL" --ignore-not-found --wait=true # leftovers from a failed run
+
+    echo "restoring backups into $DRILL ($IMAGE)…"
+    kubectl apply -f - <<EOF
+    apiVersion: postgresql.cnpg.io/v1
+    kind: Cluster
+    metadata:
+      name: $DRILL
+    spec:
+      instances: 1
+      imageName: $IMAGE
+      storage:
+        size: 50Gi
+      bootstrap:
+        recovery:
+          source: origin
+      externalClusters:
+        - name: origin
+          plugin:
+            name: barman-cloud.cloudnative-pg.io
+            parameters:
+              barmanObjectName: r2-backups
+              serverName: shani-db
+    EOF
+    kubectl wait "cluster/$DRILL" --for=condition=Ready --timeout=60m
+
+    sql() { # sql <cluster> <query>
+      local pod
+      pod=$(kubectl get pod -l "cnpg.io/cluster=$1,cnpg.io/instanceRole=primary" -o jsonpath='{.items[0].metadata.name}')
+      kubectl exec "$pod" -c postgres -- psql -U postgres -d shani -tAc "$2"
+    }
+    # everything older than a day must be in the restore (newer rows may still be in un-archived WAL)
+    q_orders="select count(*) from orders where created_at < now() - interval '1 day'"
+    q_products="select count(*) from products"
+    live_orders=$(sql shani-db "$q_orders");  drill_orders=$(sql "$DRILL" "$q_orders")
+    live_products=$(sql shani-db "$q_products"); drill_products=$(sql "$DRILL" "$q_products")
+    echo "orders older than 1 day: live=$live_orders restored=$drill_orders"
+    echo "products:                live=$live_products restored=$drill_products"
+
+    if (( drill_products == 0 || drill_orders < live_orders )); then
+      echo "RESTORE DRILL FAILED – the restored database is missing data" >&2
+      [[ -n ${PING_URL:-} ]] && curl -fsS -m 10 --retry 3 "$PING_URL/fail" >/dev/null || true
+      exit 1
+    fi
+    echo "RESTORE DRILL OK"
+    [[ -n ${PING_URL:-} ]] && curl -fsS -m 10 --retry 3 "$PING_URL" >/dev/null || true
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: restore-drill
+spec:
+  schedule: "0 4 3 * *" # 3rd of every month, 04:00
+  timeZone: Asia/Jerusalem
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 5400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: restore-drill
+        spec:
+          serviceAccountName: restore-drill
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: drill
+              image: alpine/k8s:1.37.1 # kubectl + bash + curl
+              command: [bash, /scripts/drill.sh]
+              env:
+                - name: HOME
+                  value: /tmp
+                - name: PING_URL # healthchecks.io check URL – optional (see seal-secrets.sh)
+                  valueFrom:
+                    secretKeyRef:
+                      name: restore-drill
+                      key: PING_URL
+                      optional: true
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: scripts
+              configMap:
+                name: restore-drill
+            - name: tmp
+              emptyDir: {}

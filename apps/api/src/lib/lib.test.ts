@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { Secrets } from './crypto';
 import { processCustomerPhoto, processPublicImage } from './images';
 import { MockPaymentProvider } from './payments';
-import { LocalStorage, publicUrl } from './storage';
+import { contentType, LocalStorage, publicUrl, S3Storage, signV4 } from './storage';
 
 const secrets = new Secrets('test-secret-'.padEnd(64, 'x'));
 
@@ -80,5 +80,81 @@ describe('storage', () => {
   it('maps public keys to /media URLs', () => {
     expect(publicUrl('public/a.webp')).toBe('/media/a.webp');
     expect(publicUrl(null)).toBeNull();
+  });
+});
+
+describe('S3 storage (Cloudflare R2)', () => {
+  it('signs exactly like the AWS Signature V4 documentation example (GET Object)', () => {
+    // https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html – "Example: GET Object"
+    const h = signV4({
+      method: 'GET',
+      host: 'examplebucket.s3.amazonaws.com',
+      path: '/test.txt',
+      headers: { range: 'bytes=0-9' },
+      payloadHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      region: 'us-east-1',
+      service: 's3',
+      accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+      secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+      now: new Date('2013-05-24T00:00:00Z'),
+    });
+    expect(h.authorization).toBe(
+      'AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, ' +
+        'SignedHeaders=host;range;x-amz-content-sha256;x-amz-date, ' +
+        'Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41',
+    );
+    expect(h['x-amz-date']).toBe('20130524T000000Z');
+    expect(h).not.toHaveProperty('host');
+  });
+
+  function fakeS3() {
+    const objects = new Map<string, Buffer>();
+    const calls: { method: string; url: string; headers: Record<string, string> }[] = [];
+    const fetchFn = (async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      const method = init?.method ?? 'GET';
+      calls.push({ method, url, headers: init?.headers as Record<string, string> });
+      if (method === 'PUT') {
+        objects.set(url, Buffer.from(init!.body as Uint8Array));
+        return new Response(null, { status: 200 });
+      }
+      if (method === 'DELETE') {
+        objects.delete(url);
+        return new Response(null, { status: 204 });
+      }
+      const obj = objects.get(url);
+      return obj ? new Response(new Uint8Array(obj), { status: 200 }) : new Response('NoSuchKey', { status: 404 });
+    }) as typeof fetch;
+    const s3 = new S3Storage(
+      { endpoint: 'https://acc.r2.cloudflarestorage.com', bucket: 'shani-media', accessKeyId: 'id', secretAccessKey: 'secret', region: 'auto' },
+      fetchFn,
+    );
+    return { s3, calls };
+  }
+
+  it('puts, gets and removes objects with path-style signed requests', async () => {
+    const { s3, calls } = fakeS3();
+    await s3.put('public/a.webp', Buffer.from('pic'));
+    expect(calls[0]!.url).toBe('https://acc.r2.cloudflarestorage.com/shani-media/public/a.webp');
+    expect(calls[0]!.headers['content-type']).toBe('image/webp');
+    expect(calls[0]!.headers.authorization).toMatch(/^AWS4-HMAC-SHA256 Credential=id\/\d{8}\/auto\/s3\/aws4_request, SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date, Signature=[0-9a-f]{64}$/);
+    expect((await s3.get('public/a.webp')).toString()).toBe('pic');
+    await s3.remove('public/a.webp');
+    await expect(s3.get('public/a.webp')).rejects.toMatchObject({ code: 'ENOENT' });
+    await s3.remove('public/a.webp'); // deleting a missing file is fine
+  });
+
+  it('refuses path traversal keys before sending anything', async () => {
+    const { s3, calls } = fakeS3();
+    await expect(s3.put('../etc/passwd', Buffer.from('x'))).rejects.toThrow('bad storage key');
+    await expect(s3.get('private/..')).rejects.toThrow('bad storage key');
+    await expect(s3.get('other/a.jpg')).rejects.toThrow('bad storage key');
+    expect(calls).toHaveLength(0);
+  });
+
+  it('knows the picture content types', () => {
+    expect(contentType('public/a.webp')).toBe('image/webp');
+    expect(contentType('private/b.JPG')).toBe('image/jpeg');
+    expect(contentType('public/c.bin')).toBe('application/octet-stream');
   });
 });

@@ -1,0 +1,29 @@
+# The single public entry point. Traefik (GatewayClass "traefik") implements it;
+# ports 8000/8443 are Traefik's entrypoints, exposed as 80/443 on the OCI Network Load Balancer.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: public
+  namespace: traefik
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 8000
+      allowedRoutes:
+        namespaces:
+          from: Same # only the redirect route below
+    - name: https
+      protocol: HTTPS
+      port: 8443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: shop-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              shop.gateway/allowed: "true"

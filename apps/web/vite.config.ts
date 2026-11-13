@@ -18,5 +18,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: false,
+    // Node 25+ has its own global localStorage, which hides jsdom's – turn it off in the test workers
+    poolOptions: {
+      forks: { execArgv: ['--no-experimental-webstorage'] },
+      threads: { execArgv: ['--no-experimental-webstorage'] },
+    },
   },
 });

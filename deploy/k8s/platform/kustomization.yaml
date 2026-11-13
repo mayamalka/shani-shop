@@ -1,0 +1,8 @@
+# Cluster-wide pieces that don't belong to one app: TLS issuer + certificate, the public Gateway, redirects.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - cluster-issuer.yaml
+  - certificate.yaml
+  - gateway.yaml
+  - redirects.yaml

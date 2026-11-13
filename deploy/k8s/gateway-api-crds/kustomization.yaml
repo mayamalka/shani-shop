@@ -1,0 +1,5 @@
+# Gateway API standard-channel CRDs (Traefik v3.7 is built against v1.6.3). Upgrade together with Traefik.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.3/standard-install.yaml

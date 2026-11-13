@@ -16,3 +16,11 @@ blob-report/
 .DS_Store
 e2e/.tmp/
 e2e/.auth/
+# deployment secrets / local state (see deploy/README.md)
+deploy/k8s/secrets.env
+infra/terraform/.terraform/
+infra/terraform/*.tfvars
+!infra/terraform/kubernetes.auto.tfvars
+infra/terraform/backend.hcl
+*.tfstate
+*.tfstate.*

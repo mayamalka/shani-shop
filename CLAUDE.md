@@ -10,13 +10,13 @@ This file is for whoever works on the code next: what exists, why it is the way 
   typecheck, ESLint (0 warnings), 34 shared + 19 web + 74 API (unit + integration) tests, 89 Playwright e2e (desktop + Android; 4 desktop-only tests skip on mobile by design).
 - `npm audit --omit=dev` → 0 vulnerabilities (after upgrading @fastify/static 10, nodemailer 10, sharp 0.35, zod 4).
 - **Not committed to git yet** – the user will push to their own GitHub. Commit only when asked.
-- Runs on localhost only. Hosting is deliberately deferred (user prefers managed cloud later – see README).
+- **Hosting decided and built (2026-11-13), not deployed yet**: Kubernetes on Oracle OKE Basic (Always Free A1) + Argo CD – runbook in [deploy/README.md](deploy/README.md). The user still has to create the accounts, run Terraform and fill the placeholders.
 
 ### Open items (waiting on the user / later)
 1. **Payment provider**: user chose "option B" (own checkout + provider's hosted payment page) but not which provider (Grow / PayPlus / Cardcom). Today: `MockPaymentProvider`. Adapter steps are in README → "Payments".
 2. **Real content**: product photos, custom-page catalog pictures, About text, business email, WhatsApp, Instagram/TikTok URLs, pickup address, accessibility coordinator – all editable in admin → הגדרות / ניהול מוצרים / עמודי הרכבה. Seed data has clearly marked placeholders.
 3. **Legal pages** (`apps/web/src/pages/Legal.tsx`) are drafts → need lawyer review before launch.
-4. **Hosting** (Render/Railway/Fly + Neon/Supabase + R2/S3 + Resend). Cloud photo storage needs a `StorageProvider` implementation (`apps/api/src/lib/storage.ts`).
+4. **Hosting – first deploy**: follow deploy/README.md → "First-time setup" (OCI + Cloudflare accounts, `terraform apply`, replace placeholders `OWNER` / `shop.example.com` / `ACCOUNT_ID` / `RESERVED_PUBLIC_IP`, Argo CD bootstrap, `seal-secrets.sh`, seed + create-admin). Nothing in `deploy/` or `infra/` has run against a real cluster yet; CI validates manifests (kubeconform) and Terraform (validate).
 5. iPhone/WebKit e2e has never run in this environment (browsers can't be downloaded here); it runs in GitHub Actions.
 6. **Shipping fee shown in the cart before the customer chooses delivery** – the user finds this odd but said **"don't change it yet"**. Cart quotes with `SHIPPING`; delivery is chosen at checkout. Wait for the user's decision.
 7. **Real email sending**: `EMAIL_TRANSPORT=file` writes to `.outbox/` – nothing is sent. Needs SMTP credentials from the user (README → "Sending real emails").
@@ -24,11 +24,14 @@ This file is for whoever works on the code next: what exists, why it is the way 
 
 ## Picking up next session
 
-- Local state on this machine: `.env` (dev secret, port 54329), `.local-db/` (database with seed data, a demo admin `shani@example.com` and a test order), `uploads/`, `.outbox/`. All git-ignored. If the admin password/authenticator is unknown, reset it: `npm run create-admin -- --email shani@example.com`.
+- **Moved to a Windows 11 laptop (2026-11-12)**: Node LTS installed globally via winget. `.local-db/` was re-created fresh (seed data only, test admin `admin@test.local`, no orders). `scripts/local-db.mjs` now passes `--encoding=UTF8` to initdb – Windows otherwise defaults to WIN1252 and Hebrew breaks.
+- Local state on this machine: `.env` (dev secret, port 54329), `.local-db/`, `uploads/`, `.outbox/`. All git-ignored. If the admin password/authenticator is unknown, reset it: `npm run create-admin -- --email admin@test.local`.
 - Start: `npm run db:local` (keep running) → `npm run dev` → http://localhost:5173 (user opens it via VS Code port forwarding).
 - Nothing is committed to git yet.
 
 ## User decisions (don't re-litigate)
+
+- **Hosting = Kubernetes** (2026-11-13). Priorities: $0 (one-time payment > monthly), then easiest long-term maintenance; the user is a DevOps engineer, so a harder setup is fine. The user **rejected a single VM and a single combined image** ("old fashioned") → separate `api` and `web` images, OKE Basic (free control plane) on 2 × A1 (1 OCPU/6 GB = the whole 2026 free allowance), frontend = its own nginx pod in the cluster (not Cloudflare Pages), DB = CloudNativePG in-cluster (not Neon), GitOps with Argo CD, Traefik as Gateway API, cert-manager, Sealed Secrets, R2 for files + DB backups, Renovate for updates.
 
 - **Admin UX = edit in place** (round 2): no separate products page – products are edited from the shop (pencil on each card / on the product page, "+ הוספת מוצר" on the shop page); the About page title, text and picture are edited on the About page itself (pencils), not in settings. Orders = split view (list + selected order side by side, like the deck mockup).
 - **Product types**: when adding/editing a product the admin chooses "with names + photos" (type `PRESET` – shopper must give child + parent names and child + parents photos) or "plain product" (`SIMPLE`). Only the custom book (`CUSTOM`) can't be switched or deleted. API field: `personalized` on product create/update.
@@ -59,7 +62,7 @@ packages/shared   zod schemas (Hebrew error messages), price calculator, types, 
 apps/api          Fastify 5. src/server.ts = buildApp() (plugins, CSP, origin check, error handler, routes). src/index.ts = migrate + listen + photo purge timer.
   src/routes      public.ts (catalog, quote, uploads, orders, contact, consent) · payments.ts (webhook + mock page) · auth.ts (login/verify/me/logout + requireAdmin) · admin.ts
   src/services    catalog.ts · orders.ts (quote/create/markPaid/setStatus/list/detail/purgePhotos) · auth.ts (argon2, TOTP, lockout, sessions) · notifications.ts (emails)
-  src/lib         crypto (AES-GCM for TOTP secret, HMAC) · storage (LocalStorage, keys public/… private/…) · images (sharp) · email · payments · http (HttpError, parse())
+  src/lib         crypto (AES-GCM for TOTP secret, HMAC) · storage (LocalStorage | S3Storage for R2 via STORAGE_DRIVER, keys public/… private/…) · images (sharp) · email · payments · http (HttpError, parse())
   src/db          schema.ts (Drizzle tables) · index.ts (createDb, runMigrations) · seed.ts (exported seed() + CLI) · ensure.ts (create/reset DB for tests) · art.ts (placeholder SVG art)
 apps/web          React 19 + Vite 7 + React Router 7 (createBrowserRouter) + TanStack Query + Tailwind 4.
   src/pages       shop pages · src/admin (lazy-loaded) · src/components (Layout, ui.tsx form kit, PhotoUpload, PagePicker, CookieBanner, A11yMenu, Dialog)
@@ -104,6 +107,9 @@ PW_CHANNEL=chrome npm run test:e2e    # in this environment (uses installed Goog
 
 ## Environment gotchas (this machine)
 
+- **Node 26** (Active LTS since 2026-10-28) everywhere: local, CI, images. Node 25+ has its own global `localStorage` that hides jsdom's → `apps/web/vite.config.ts` starts the test workers with `--no-experimental-webstorage`.
+- No Docker / kubectl / helm / terraform installed here. Git Bash heredocs here collapse double backslashes into single ones – write files with backslashes via the editor, not `cat <<EOF`.
+
 - Outbound downloads are partly blocked: Prisma engines, corepack/pnpm, Playwright browsers all fail. npm registry works but is **slow** (installs can take 10+ minutes – run them in the background).
 - npm 11 blocks install scripts unless approved: root `package.json` → `allowScripts` (argon2, sharp, esbuild, @embedded-postgres/linux-x64). Add new native packages there.
 - Docker exists but the user has no permission to the socket → use `npm run db:local`.
@@ -130,3 +136,9 @@ PW_CHANNEL=chrome npm run test:e2e    # in this environment (uses installed Goog
    - Orders: split view (list + order panel), status filters/search kept in the URL while switching orders, status actions at the top of the panel; on phones the order opens full-screen with a back link.
    - "ממתינה לתשלום" (customer reached the payment page but didn't pay): removed from the admin list/counts/tabs; `purgePhotos()` now deletes those records entirely after 7 days (`abandonedCheckoutsDeleted`).
 8. **User review round 3 (add product)**: photos can be chosen in the "new product" form itself (uploaded right after the product is created; a failed photo never blocks the saved product), and the form asks whether the product needs names + photos (`PRESET`) or not (`SIMPLE`); the same choice is editable later. Personalized products (except the custom book) can now be deleted.
+9. **Hosting (Kubernetes)** – see deploy/README.md:
+   - App changes (all default to the old local behaviour): `STORAGE_DRIVER=local|s3` + `S3Storage` (hand-written AWS SigV4 in `lib/storage.ts`, tested against the AWS docs example – `npm install` of an SDK was blocked here, and it keeps the image small); `/media/:name` is now a route reading from storage (was `@fastify/static` on a folder); `RUN_MIGRATIONS` / `PURGE_TIMER` flags; `src/jobs.ts` (`purgeOnce`), CLIs `src/cli/migrate.ts`, `src/cli/purge.ts`; tsup builds `dist/{index,migrate,purge,seed,create-admin}.js`; `buildApp({ storage })` for tests.
+   - `deploy/docker/` images (Node 26, arm64), nginx `security-headers.conf` mirrors helmet – `test/headers.test.ts` fails if they drift. CI moved to Node 26 and got `images` (build + smoke test) and `manifests` (kubeconform + terraform validate) jobs; `release.yml` pushes images to GHCR and commits tags into `deploy/k8s/app/prod/kustomization.yaml`.
+   - Pinned versions (Nov 2026, each ≥ 2 weeks old): argo-cd chart 10.11.6, traefik 42.1.3 (Traefik v3.7, Gateway API v1.6.3 CRDs installed separately – the chart no longer ships them), cert-manager v1.21.3, cloudnative-pg 0.29.1, plugin-barman-cloud 0.8.1 (in-tree `barmanObjectStore` is deprecated), sealed-secrets 2.22.0 (repo moved to `bitnami/sealed-secrets`, chart repo `https://bitnami.github.io/sealed-secrets`), Postgres image `17.10-standard-trixie`, Terraform providers oci 7.32 / cloudflare 5.29 (validated with Terraform 1.16.7).
+10. **Hosting automation (2026-11-13, user request)**: Renovate auto-merges patch updates (npm + Dockerfile base images, `automergeType: branch` = no PR/email unless CI fails); minor/major stay PRs. `.github/workflows/k8s-version.yml` (weekly, read-only OCI user via `OCI_CLI_*` secrets) opens a PR bumping the committed `infra/terraform/kubernetes.auto.tfvars`; `terraform apply` after merge stays manual (needs write creds – deliberately kept off GitHub). Restore drill = in-cluster CronJob `restore-drill` (base/restore-drill.yaml, monthly, alpine/k8s image, healthchecks.io dead-man ping) – not a GitHub workflow, because the Kubernetes API is only open to `admin_cidrs`. Node pool no longer ignores image changes → each apply rolls nodes to the newest patched OKE image. Docker Desktop + WSL2 installed on the laptop (restart pending).
+11. **Images verified locally (2026-11-13)** with Docker Desktop (installed on the laptop): both images build for amd64 and arm64. The API image ran migrate → seed → server → purge against Postgres 17 + an S3-compatible store (RustFS), with public pictures and private customer photos stored in and served from S3. The web image's SPA fallback, cache headers and CSP check out. Fixes found doing this: **`package-lock.json` pointed all 653 packages at a private JFrog mirror (`infraedge.jfrog.io`, left over from the original build machine) → rewritten to `https://registry.npmjs.org/` (integrity hashes unchanged). The project must only use public resources – never add private registries/mirrors.** The build stages now use `npm ci --include-workspace-root` (TypeScript lives at the root).

@@ -12,7 +12,16 @@ const dir = process.env.LOCAL_DB_DIR ?? path.join(root, '.local-db');
 const port = Number(process.env.LOCAL_DB_PORT ?? 54329);
 const databases = (process.env.LOCAL_DB_NAMES ?? 'shani,shani_test').split(',');
 
-const pg = new EmbeddedPostgres({ databaseDir: dir, user: 'shani', password: 'shani', port, persistent: true, onLog: () => {} });
+const pg = new EmbeddedPostgres({
+  databaseDir: dir,
+  user: 'shani',
+  password: 'shani',
+  port,
+  persistent: true,
+  // Windows defaults to the WIN1252 code page, which can't store Hebrew – force UTF-8 on first init.
+  initdbFlags: ['--encoding=UTF8'],
+  onLog: () => {},
+});
 
 const fresh = !existsSync(path.join(dir, 'PG_VERSION'));
 if (fresh) await pg.initialise();

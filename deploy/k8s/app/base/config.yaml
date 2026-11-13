@@ -1,0 +1,25 @@
+# Non-secret settings (secrets: SealedSecret "api-secrets", see deploy/k8s/seal-secrets.sh).
+# The prod overlay replaces the domain-specific values.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shop-config
+data:
+  NODE_ENV: production
+  WEB_URL: https://shop.example.com
+  API_URL: https://shop.example.com
+  COOKIE_SECURE: "true"
+  # files (product pictures + private customer photos) in Cloudflare R2
+  STORAGE_DRIVER: s3
+  S3_ENDPOINT: https://ACCOUNT_ID.r2.cloudflarestorage.com
+  S3_BUCKET: shani-media
+  S3_REGION: auto
+  # email (Brevo / Resend / any SMTP); user + password are in api-secrets
+  EMAIL_TRANSPORT: smtp
+  SMTP_HOST: smtp-relay.brevo.com
+  SMTP_PORT: "587"
+  EMAIL_FROM: "הדודה שני <no-reply@shop.example.com>"
+  PAYMENT_PROVIDER: mock
+  # Kubernetes runs these as a Job / CronJob instead of inside every API pod
+  RUN_MIGRATIONS: "false"
+  PURGE_TIMER: "false"

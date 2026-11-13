@@ -16,11 +16,13 @@ apps/api         Node + Fastify + Drizzle ORM (PostgreSQL) – prices, orders, u
 packages/shared  Price calculator, validation rules and types – used by both apps so they always agree
 e2e/             Playwright end-to-end tests (desktop, Android, iPhone)
 docs/plan/       Plan deck, mockups, written plan
+deploy/          Docker images, Kubernetes manifests (Argo CD), hosting runbook – see deploy/README.md
+infra/terraform  Oracle Cloud (OKE cluster) + Cloudflare (DNS, R2) infrastructure
 ```
 
 ## Run it on your computer
 
-Requirements: **Node.js 20.19+ (22 recommended)** and a PostgreSQL database – either Docker, or the built-in no-Docker option.
+Requirements: **Node.js 20.19+ (26 recommended – what CI and production use)** and a PostgreSQL database – either Docker, or the built-in no-Docker option.
 
 ```bash
 npm install
@@ -34,6 +36,8 @@ docker compose up -d            # PostgreSQL on 5432 (+ Mailpit email inbox on h
 # or, without Docker:
 npm run db:local                # PostgreSQL from npm on port 54329 – keep this terminal open
 ```
+
+The local database is stored in `.local-db/` (git-ignored) and initialized as UTF-8 so Hebrew works on Windows too. If you created `.local-db/` before this fix and Hebrew text breaks, stop the database, delete `.local-db/` and run `npm run db:local` again.
 
 In `.env` set `DATABASE_URL` to match (both examples are in `.env.example`), and set `APP_SECRET`:
 
@@ -118,19 +122,26 @@ Development uses a **mock payment page** (`PAYMENT_PROVIDER=mock`). To go live w
 
 Refunds are done in the provider's dashboard; marking an order "cancelled" in the admin does not refund.
 
-## Hosting later (preferred: managed cloud)
+## Hosting (Kubernetes, $0 a month)
 
-Nothing here is tied to a host. The recommended setup:
+Production runs on an **Oracle Cloud OKE Basic cluster** on the Always Free tier: 2 Ampere A1 nodes, managed by **Argo CD** from this repo.
+The full runbook, covering setup, placeholders, secrets, upgrades and the restore drill, is in [deploy/README.md](deploy/README.md).
 
-| Part | Suggested service | Notes |
+- **Two images:** `api` (Fastify) and `web` (nginx serving the React build), both built for arm64 by `.github/workflows/release.yml` after CI passes on `main`.
+- **One domain:** Traefik (Gateway API) sends `/api` and `/media` to the API and everything else to the web pods. Cloudflare sits in front as DNS, proxy and TLS.
+- **PostgreSQL:** CloudNativePG, with continuous backups to Cloudflare R2 (30-day point-in-time recovery).
+- **Pictures and customer photos:** Cloudflare R2 (`STORAGE_DRIVER=s3`). Local development keeps using `UPLOAD_DIR`.
+- **Infrastructure:** Terraform in `infra/terraform`. **Updates:** Renovate PRs.
+
+Settings only production uses (all have defaults that keep local development unchanged):
+
+| Variable | Default | Production |
 |---|---|---|
-| Website + API | **Render / Railway / Fly.io** (one Node service) | `npm ci && npm run build`, start `npm start` with `SERVE_WEB=true` – the API serves the website too (one domain, simplest). Alternatively host `apps/web/dist` on Vercel/Netlify/Cloudflare Pages and proxy `/api` + `/media` to the API. |
-| Database | **Neon** or **Supabase** PostgreSQL | set `DATABASE_URL`; migrations run automatically on start; enable daily backups |
-| Customer photos & product pictures | **Cloudflare R2 / AWS S3** (private bucket) | implement `StorageProvider` in `apps/api/src/lib/storage.ts` (local folder today) – or use a host with a persistent disk |
-| Email | **Resend / Postmark / SendGrid** via SMTP | `EMAIL_TRANSPORT=smtp` + SMTP settings; set up SPF/DKIM for the domain |
-| Domain + HTTPS | any registrar + the host's free certificate | set `COOKIE_SECURE=true`, `WEB_URL`/`API_URL` to `https://…`, `NODE_ENV=production`, a new `APP_SECRET` |
+| `STORAGE_DRIVER` | `local` | `s3`, plus `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` (`S3_REGION=auto` for R2) |
+| `RUN_MIGRATIONS` | `true` | `false`: the `migrate` Job runs `node apps/api/dist/migrate.js` |
+| `PURGE_TIMER` | `true` | `false`: the `purge-photos` CronJob runs `node apps/api/dist/purge.js` |
 
-Production checklist: new `APP_SECRET` (never reuse the dev one), `COOKIE_SECURE=true`, real payment provider, business details in settings, lawyer-reviewed legal pages, create the admin with `npm run create-admin` on the server.
+Production checklist: a new `APP_SECRET` (never reuse the dev one, and keep a copy), a real payment provider, business details in settings, lawyer-reviewed legal pages, and the admin created with `create-admin` in the cluster (see the runbook).
 
 ## Moving this project to another GitHub
 

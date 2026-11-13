@@ -15,7 +15,7 @@ import { createEmail, type EmailProvider } from './lib/email';
 import { HttpError } from './lib/http';
 import { MAX_UPLOAD_BYTES } from './lib/images';
 import { MockPaymentProvider, type PaymentProvider } from './lib/payments';
-import { LocalStorage, type StorageProvider } from './lib/storage';
+import { contentType, createStorage, type StorageProvider } from './lib/storage';
 import { adminRoutes } from './routes/admin';
 import { authRoutes } from './routes/auth';
 import { paymentRoutes } from './routes/payments';
@@ -47,6 +47,8 @@ export interface BuildOptions {
   /** pass an existing db (tests); otherwise a pool is created from DATABASE_URL */
   db?: DB;
   email?: EmailProvider;
+  /** file storage (tests); otherwise chosen by STORAGE_DRIVER */
+  storage?: StorageProvider;
   logger?: boolean;
 }
 
@@ -65,7 +67,7 @@ export async function buildApp(opts: BuildOptions = {}): Promise<FastifyInstance
     app.addHook('onClose', () => created.pool.end());
   }
   const secrets = new Secrets(cfg.APP_SECRET);
-  const storage = new LocalStorage(cfg.UPLOAD_DIR);
+  const storage = opts.storage ?? createStorage(cfg);
   const email = opts.email ?? createEmail(cfg);
   const payments = new MockPaymentProvider(cfg.API_URL, secrets);
   const notifier = new Notifier(db, email, app.log, cfg.WEB_URL);
@@ -128,7 +130,22 @@ export async function buildApp(opts: BuildOptions = {}): Promise<FastifyInstance
   });
 
   // product & page pictures (public). Customer photos live under private/ and are never served here.
-  await app.register(fastifyStatic, { root: storage.publicDir(), prefix: '/media/', decorateReply: false, maxAge: '7d', immutable: true });
+  // Names are random and never reused, so the files can be cached for good (Cloudflare caches them at the edge).
+  app.get<{ Params: { name: string } }>('/media/:name', async (req, reply) => {
+    const { name } = req.params;
+    if (!/^[\w-][\w.-]*$/.test(name) || name.includes('..')) throw new HttpError(404, 'NOT_FOUND', 'לא נמצא');
+    let buf: Buffer;
+    try {
+      buf = await storage.get('public/' + name);
+    } catch (err) {
+      if ((err as { code?: string }).code === 'ENOENT') throw new HttpError(404, 'NOT_FOUND', 'לא נמצא');
+      throw err;
+    }
+    return reply
+      .header('content-type', contentType(name))
+      .header('cache-control', 'public, max-age=604800, immutable')
+      .send(buf);
+  });
 
   await app.register(publicRoutes, { prefix: '/api' });
   await app.register(paymentRoutes, { prefix: '/api/payments' });

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":dependencyDashboard", ":semanticCommitsDisabled"],
+  "timezone": "Asia/Jerusalem",
+  "schedule": ["before 9am on monday"],
+  "minimumReleaseAge": "7 days",
+  "argocd": {
+    "managerFilePatterns": ["/^deploy/k8s/argocd/.+\\.yaml$/"]
+  },
+  "kubernetes": {
+    "managerFilePatterns": ["/^deploy/k8s/.+\\.yaml$/"]
+  },
+  "packageRules": [
+    {
+      "description": "Our own images are bumped by the release workflow, not Renovate",
+      "matchDepNames": ["ghcr.io/**/shani-api", "ghcr.io/**/shani-web", "shani-api", "shani-web"],
+      "enabled": false
+    },
+    {
+      "description": "Keep PostgreSQL on major 17 (a major upgrade is a planned CNPG operation)",
+      "matchDepNames": ["ghcr.io/cloudnative-pg/postgresql"],
+      "allowedVersions": "/^17\\./"
+    },
+    {
+      "description": "Patch updates (npm packages, Node/nginx base images) merge themselves when CI passes – no PR, no email. If CI fails, Renovate opens a PR instead.",
+      "matchManagers": ["npm", "dockerfile"],
+      "matchUpdateTypes": ["patch", "digest", "pin", "pinDigest"],
+      "groupName": "patch updates",
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "One weekly PR for npm minor updates – review and merge",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor"],
+      "groupName": "npm minor"
+    },
+    {
+      "description": "One PR for the cluster add-ons (Helm charts in the Argo CD apps)",
+      "matchManagers": ["argocd"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "cluster add-ons"
+    },
+    {
+      "description": "Node major upgrades are done by hand (Dockerfiles + CI together)",
+      "matchDepNames": ["node"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    }
+  ]
+}

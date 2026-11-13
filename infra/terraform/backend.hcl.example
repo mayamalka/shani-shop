@@ -1,0 +1,7 @@
+# Copy to backend.hcl (git-ignored). Create the bucket once (Always Free: 20 GB Object Storage):
+#   oci os bucket create --name shani-tfstate --compartment-id <compartment_ocid> --versioning Enabled
+#   oci os ns get     # → namespace
+bucket    = "shani-tfstate"
+namespace = "your-object-storage-namespace"
+key       = "shani/terraform.tfstate"
+region    = "il-jerusalem-1"

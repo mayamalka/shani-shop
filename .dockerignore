@@ -1,0 +1,19 @@
+# keep the build context small and never ship local data or secrets
+**/node_modules
+**/dist
+.git
+.github
+.local-db
+uploads
+.outbox
+.env
+.env.*
+!.env.example
+e2e
+playwright-report
+test-results
+coverage
+docs
+infra
+deploy/k8s
+*.log

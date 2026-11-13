@@ -1,0 +1,26 @@
+# Site-specific settings (replace shop.example.com and ACCOUNT_ID – see deploy/README.md → "Placeholders").
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shop-config
+data:
+  WEB_URL: https://shop.example.com
+  API_URL: https://shop.example.com
+  S3_ENDPOINT: https://ACCOUNT_ID.r2.cloudflarestorage.com
+  EMAIL_FROM: "הדודה שני <no-reply@shop.example.com>"
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: shop
+spec:
+  hostnames:
+    - shop.example.com
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: r2-backups
+spec:
+  configuration:
+    endpointURL: https://ACCOUNT_ID.r2.cloudflarestorage.com

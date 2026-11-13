@@ -1,0 +1,17 @@
+# Production overlay. Site-specific values live in this folder:
+#   - images: tags are bumped automatically by .github/workflows/release.yml
+#   - site.yaml: domain, R2 account, email sender
+# Secrets are NOT here – they are SealedSecrets in ./sealed (separate Argo CD app, see seal-secrets.sh).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../base
+patches:
+  - path: site.yaml
+images:
+  - name: shani-api
+    newName: ghcr.io/mayamalka/shani-api
+    newTag: latest
+  - name: shani-web
+    newName: ghcr.io/mayamalka/shani-web
+    newTag: latest

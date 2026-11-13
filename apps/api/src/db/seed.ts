@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { loadConfig } from '../config';
-import { LocalStorage, type StorageProvider } from '../lib/storage';
+import { createStorage, type StorageProvider } from '../lib/storage';
 import { feltSvg } from './art';
 import { createDb, runMigrations, type DB } from './index';
 import { pageOptions, pricingTiers, productImages, products, settings } from './schema';
@@ -112,7 +112,7 @@ export async function seed(db: DB, storage: StorageProvider, log: (m: string) =>
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const cfg = loadConfig();
   const { db, pool } = createDb(cfg.DATABASE_URL);
-  seed(db, new LocalStorage(cfg.UPLOAD_DIR))
+  seed(db, createStorage(cfg))
     .catch((e) => {
       console.error(e);
       process.exitCode = 1;

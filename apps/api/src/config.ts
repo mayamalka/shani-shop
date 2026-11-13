@@ -14,6 +14,11 @@ const bool = z
   .string()
   .optional()
   .transform((v) => v === 'true' || v === '1');
+/** like bool, but true when the variable is not set */
+const boolDefaultTrue = z
+  .string()
+  .optional()
+  .transform((v) => v === undefined || v === '' || v === 'true' || v === '1');
 
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -23,7 +28,14 @@ const schema = z.object({
   API_PORT: z.coerce.number().int().default(3001),
   API_HOST: z.string().default('0.0.0.0'),
   APP_SECRET: z.string().min(32, 'APP_SECRET must be at least 32 characters'),
+  /** "local" = files in UPLOAD_DIR · "s3" = Cloudflare R2 / S3 / MinIO (needed when running more than one API instance) */
+  STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
   UPLOAD_DIR: z.string().default('./uploads'),
+  S3_ENDPOINT: z.string().optional().default(''),
+  S3_BUCKET: z.string().optional().default(''),
+  S3_ACCESS_KEY_ID: z.string().optional().default(''),
+  S3_SECRET_ACCESS_KEY: z.string().optional().default(''),
+  S3_REGION: z.string().default('auto'),
   EMAIL_TRANSPORT: z.enum(['file', 'smtp']).default('file'),
   EMAIL_OUTBOX: z.string().default('./.outbox'),
   SMTP_HOST: z.string().default('localhost'),
@@ -36,6 +48,10 @@ const schema = z.object({
   /** serve the built web app (apps/web/dist) from the API – single-server deploys and e2e */
   SERVE_WEB: bool,
   RATE_LIMIT_DISABLED: bool,
+  /** apply DB migrations when the API starts (Kubernetes: false – a separate migrate Job does it) */
+  RUN_MIGRATIONS: boolDefaultTrue,
+  /** run the photo-purge timer inside the API process (Kubernetes: false – a CronJob does it) */
+  PURGE_TIMER: boolDefaultTrue,
 });
 
 export type Config = z.infer<typeof schema>;
@@ -49,6 +65,10 @@ export function loadConfig(overrides: Partial<Record<keyof Config, string>> = {}
   const c = parsed.data;
   if (c.NODE_ENV === 'production' && c.APP_SECRET.startsWith('change-me')) {
     throw new Error('APP_SECRET must be changed in production');
+  }
+  if (c.STORAGE_DRIVER === 's3') {
+    const missing = (['S3_ENDPOINT', 'S3_BUCKET', 'S3_ACCESS_KEY_ID', 'S3_SECRET_ACCESS_KEY'] as const).filter((k) => !c[k]);
+    if (missing.length) throw new Error(`STORAGE_DRIVER=s3 needs: ${missing.join(', ')}`);
   }
   // relative paths are relative to the repo root, so every workspace agrees
   c.UPLOAD_DIR = path.resolve(REPO_ROOT, c.UPLOAD_DIR);

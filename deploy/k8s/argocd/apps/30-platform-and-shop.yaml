@@ -1,0 +1,78 @@
+# Wave -1: issuer, certificate, Gateway. Wave 0: secrets. Wave 1: the shop itself.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mayamalka/shani-shop.git
+    targetRevision: main
+    path: deploy/k8s/platform
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+# SealedSecrets created by deploy/k8s/seal-secrets.sh (api-secrets, R2 backup keys, Cloudflare token, GHCR pull secret)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shop-secrets
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mayamalka/shani-shop.git
+    targetRevision: main
+    path: deploy/k8s/app/prod/sealed
+    directory:
+      include: "*.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shani
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    managedNamespaceMetadata: # namespace "shani" is created here (wave 0) with these labels
+      labels:
+        shop.gateway/allowed: "true"
+        pod-security.kubernetes.io/enforce: restricted
+        pod-security.kubernetes.io/enforce-version: latest
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shop
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mayamalka/shani-shop.git
+    targetRevision: main
+    path: deploy/k8s/app/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shani
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 10m

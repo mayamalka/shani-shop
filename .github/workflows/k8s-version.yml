@@ -1,0 +1,89 @@
+# Weekly: ask Oracle which Kubernetes versions OKE supports. If a newer patch of our minor version exists,
+# or the next minor version is available, open a PR that bumps infra/terraform/kubernetes.auto.tfvars
+# (one minor version at a time – Kubernetes can't skip minors). GitHub emails you about the PR.
+# After merging it: `terraform apply` (control plane first, then the nodes one by one).
+#
+# Needs repository secrets for a read-only OCI user (deploy/README.md → "Kubernetes version check"):
+#   OCI_CLI_USER, OCI_CLI_TENANCY, OCI_CLI_FINGERPRINT, OCI_CLI_KEY_CONTENT, OCI_CLI_REGION
+name: Kubernetes version check
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+      OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+      OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+      OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+      OCI_CLI_REGION: ${{ secrets.OCI_CLI_REGION }}
+      OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING: "True"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OCI CLI
+        run: pipx install oci-cli
+
+      - name: Pick the next version
+        id: pick
+        run: |
+          set -euo pipefail
+          file=infra/terraform/kubernetes.auto.tfvars
+          current=$(sed -nE 's/^kubernetes_version *= *"(v[0-9.]+)".*/\1/p' "$file")
+          available=$(oci ce cluster-options get --cluster-option-id all --query 'data."kubernetes-versions"' --raw-output | jq -r '.[]' | sort -V)
+          echo "current: $current"; echo "available:"; echo "$available"
+
+          minor() { echo "$1" | cut -d. -f1,2; }            # v1.34.1 → v1.34
+          cur_minor=$(minor "$current")
+          next_minor="v1.$(( $(echo "$cur_minor" | cut -d. -f2) + 1 ))"
+          latest_of() { echo "$available" | grep -E "^$1\.[0-9]+$" | tail -1 || true; }
+
+          target=""; reason=""
+          same=$(latest_of "$cur_minor")
+          if [[ -n $same && $same != "$current" ]]; then
+            target=$same; reason="newer patch release of $cur_minor"
+          elif [[ -n $(latest_of "$next_minor") ]]; then
+            target=$(latest_of "$next_minor"); reason="next minor version"
+          fi
+          supported=yes
+          echo "$available" | grep -qx "$current" || supported=no
+
+          if [[ -z $target ]]; then echo "Up to date."; exit 0; fi
+          sed -i -E "s/^kubernetes_version *= *\"v[0-9.]+\"/kubernetes_version = \"$target\"/" "$file"
+          {
+            echo "target=$target"
+            echo "reason=$reason"
+            echo "supported=$supported"
+            echo "current=$current"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open PR
+        if: steps.pick.outputs.target != ''
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: k8s-version/${{ steps.pick.outputs.target }}
+          commit-message: "Kubernetes ${{ steps.pick.outputs.current }} → ${{ steps.pick.outputs.target }}"
+          title: "Kubernetes ${{ steps.pick.outputs.current }} → ${{ steps.pick.outputs.target }}${{ steps.pick.outputs.supported == 'no' && ' (current version no longer supported!)' || '' }}"
+          labels: kubernetes-upgrade
+          body: |
+            Oracle now offers **${{ steps.pick.outputs.target }}** (${{ steps.pick.outputs.reason }}).
+            ${{ steps.pick.outputs.supported == 'no' && format('⚠️ The cluster''s current version {0} is no longer in OKE''s supported list – upgrade soon.', steps.pick.outputs.current) || '' }}
+
+            **Before merging** (minor versions only): skim the Kubernetes release notes for removed APIs
+            and check the add-on charts (Traefik, cert-manager, CloudNativePG, Argo CD) support it.
+
+            **After merging:**
+            ```bash
+            cd infra/terraform && git pull && terraform apply
+            ```
+            The control plane upgrades first (~15 min, the site keeps running), then the nodes are replaced
+            one at a time (never a paid 3rd node). Check afterwards: `kubectl get nodes` and the site.

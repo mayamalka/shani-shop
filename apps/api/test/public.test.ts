@@ -1,3 +1,4 @@
+import sharp from 'sharp';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { EmailMessage } from '../src/lib/email';
@@ -97,6 +98,17 @@ describe('customer photo uploads', () => {
     const r = await app.inject({ method: 'POST', url: '/api/uploads', ...body });
     expect(r.statusCode).toBe(415);
     expect(r.json().message).toMatch(/JPG/);
+  });
+
+  it('serves public pictures from /media with long-lived cache headers', async () => {
+    const pic = await sharp({ create: { width: 4, height: 4, channels: 3, background: '#f80' } }).webp().toBuffer();
+    await app.ctx.storage.put('public/media-test.webp', pic);
+    const r = await app.inject({ method: 'GET', url: '/media/media-test.webp' });
+    expect(r.statusCode).toBe(200);
+    expect(r.headers['content-type']).toBe('image/webp');
+    expect(r.headers['cache-control']).toBe('public, max-age=604800, immutable');
+    expect(r.rawPayload.equals(pic)).toBe(true);
+    expect((await app.inject({ method: 'GET', url: '/media/missing.webp' })).statusCode).toBe(404);
   });
 
   it('customer photos are never served from /media', async () => {

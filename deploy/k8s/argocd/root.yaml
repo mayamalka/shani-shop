@@ -1,0 +1,23 @@
+# App-of-apps root. Apply ONCE by hand after installing Argo CD (deploy/README.md → Bootstrap):
+#   kubectl apply -n argocd -f deploy/k8s/argocd/root.yaml
+# From then on everything under deploy/k8s/argocd/apps is managed from Git.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mayamalka/shani-shop.git
+    targetRevision: main
+    path: deploy/k8s/argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

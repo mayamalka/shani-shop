@@ -1,0 +1,45 @@
+# Argo CD Helm values – used for the one-time bootstrap (helm install) AND by the self-managing
+# "argo-cd" Application, so both always agree. Trimmed for a 2-node free-tier cluster.
+global:
+  domain: argocd.local # not exposed publicly – use: kubectl -n argocd port-forward svc/argocd-server 8080:80
+dex:
+  enabled: false
+notifications:
+  enabled: false
+applicationSet:
+  replicas: 0
+configs:
+  params:
+    server.insecure: true # TLS is not needed behind port-forward
+  cm:
+    # Let parent apps wait for child Applications to be Healthy, so sync waves order the platform
+    # (CRDs → operators → platform → shop). Argo CD doesn't assess Application health by default.
+    resource.customizations.health.argoproj.io_Application: |
+      hs = {}
+      hs.status = "Progressing"
+      hs.message = ""
+      if obj.status ~= nil then
+        if obj.status.health ~= nil then
+          hs.status = obj.status.health.status
+          if obj.status.health.message ~= nil then
+            hs.message = obj.status.health.message
+          end
+        end
+      end
+      return hs
+controller:
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 768Mi }
+server:
+  resources:
+    requests: { cpu: 20m, memory: 64Mi }
+    limits: { memory: 256Mi }
+repoServer:
+  resources:
+    requests: { cpu: 20m, memory: 96Mi }
+    limits: { memory: 512Mi }
+redis:
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits: { memory: 128Mi }
