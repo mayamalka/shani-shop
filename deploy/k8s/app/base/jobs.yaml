@@ -24,6 +24,7 @@ spec:
         runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
+      enableServiceLinks: false # no Docker-link env vars – the Service "api" would inject API_PORT=tcp://… and break the config
       containers:
         - name: migrate
           image: shani-api
@@ -80,6 +81,7 @@ spec:
             runAsGroup: 1000
             seccompProfile:
               type: RuntimeDefault
+          enableServiceLinks: false # no Docker-link env vars – the Service "api" would inject API_PORT=tcp://… and break the config
           containers:
             - name: purge
               image: shani-api

@@ -34,6 +34,7 @@ spec:
           labelSelector:
             matchLabels:
               app.kubernetes.io/name: api
+      enableServiceLinks: false # no Docker-link env vars – the Service "api" would inject API_PORT=tcp://… and break the config
       containers:
         - name: api
           image: shani-api # replaced by the overlay (kustomize images)

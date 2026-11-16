@@ -122,6 +122,7 @@ spec:
             runAsGroup: 65534
             seccompProfile:
               type: RuntimeDefault
+          enableServiceLinks: false # no Docker-link env vars – the Service "api" would inject API_PORT=tcp://… and break the config
           containers:
             - name: drill
               image: alpine/k8s:1.37.1 # kubectl + bash + curl
