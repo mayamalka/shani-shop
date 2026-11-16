@@ -108,11 +108,32 @@ kubectl -n shani exec deploy/api -- node apps/api/dist/seed.js                  
 kubectl -n shani exec -it deploy/api -- node apps/api/dist/create-admin.js --email shani@…  # QR code + backup codes
 ```
 
-### 7. Keep these off the cluster (password manager)
-- `deploy/k8s/secrets.env`. It holds **APP_SECRET**; without it the admin's authenticator can't be decrypted.
-- The sealed-secrets private key. Without it, the files in `sealed/` can't be decrypted on a new cluster:
-  `kubectl -n kube-system get secret -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-key.yaml`
-- `infra/terraform/terraform.tfvars` and `backend.hcl`.
+### 7. Back up the secrets to a password manager
+These files exist only on your PC (all git-ignored). If the PC is lost and they are not backed up, you can't change a secret, rebuild the cluster, or decrypt the admin's 2FA. Store each one as a **secure note** (paste the file's text; every password manager supports this, file attachments are often a paid feature).
+
+| Secure note | What to paste | Why it matters |
+|---|---|---|
+| `shani – secrets.env` | the whole `deploy/k8s/secrets.env` | **APP_SECRET** decrypts the admin's authenticator; the rest are the R2, DNS and SMTP keys |
+| `shani – sealed-secrets key` | output of the command below | without it, the files in `app/prod/sealed/` can't be decrypted on a new cluster |
+| `shani – terraform` | `infra/terraform/terraform.tfvars` + `infra/terraform/backend.hcl` | inputs for every `terraform plan/apply` |
+| `shani – Cloudflare terraform token` | the `terraform-shani` API token | Cloudflare shows it only once |
+| `shani – OCI API key` | `~/.oci/config` + `~/.oci/oci_api_key.pem` | Terraform and kubectl log in to Oracle with it (or create a new key in the console instead) |
+| `shani – admin backup codes` | the 10 codes `create-admin.js` prints (step 6) | the admin's way in if their phone is lost – give these to the admin |
+
+Steps:
+1. Export the sealed-secrets key (it changes only if the controller is reinstalled) and paste it into the note:
+   ```bash
+   kubectl -n kube-system get secret -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-key.yaml
+   ```
+2. Create the notes in the table, then **delete the exported key file**: `rm sealed-secrets-key.yaml` (it can decrypt every sealed secret).
+3. Update the note every time you change the file behind it (a new secret in `secrets.env`, a new IP in `terraform.tfvars`, a rotated token).
+4. Share the vault entries with the owner (Shani), so access doesn't depend on one person.
+
+Restoring on a new cluster: install sealed-secrets first, then before Argo CD syncs the `secrets` app:
+```bash
+kubectl apply -f sealed-secrets-key.yaml        # recreated from the note
+kubectl -n kube-system delete pod -l app.kubernetes.io/name=sealed-secrets   # the controller reloads the keys
+```
 
 ### 8. Monitoring and automatic checks
 - [UptimeRobot](https://uptimerobot.com) (free): a keyword monitor on `https://<domain>/api/health` (keyword `ok`), plus one on `https://<domain>/`.
