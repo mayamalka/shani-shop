@@ -11,7 +11,7 @@ patches:
 images:
   - name: shani-api
     newName: ghcr.io/mayamalka/shani-api
-    newTag: 0ecc79517dda3606ca2fd0ff40f94e45cc159c55
+    newTag: 852fc4228fbb344df9b32a8fa0bb7c01cbcc8224
   - name: shani-web
     newName: ghcr.io/mayamalka/shani-web
-    newTag: 0ecc79517dda3606ca2fd0ff40f94e45cc159c55
+    newTag: 852fc4228fbb344df9b32a8fa0bb7c01cbcc8224
