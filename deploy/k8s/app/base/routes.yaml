@@ -10,7 +10,7 @@ spec:
       namespace: traefik
       sectionName: https
   hostnames:
-    - shop.example.com
+    - hadoda-shani.co.il
   rules:
     - matches:
         - path: { type: PathPrefix, value: /api }

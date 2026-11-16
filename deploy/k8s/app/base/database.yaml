@@ -11,7 +11,7 @@ spec:
   retentionPolicy: 30d
   configuration:
     destinationPath: s3://shani-db-backups/
-    endpointURL: https://ACCOUNT_ID.r2.cloudflarestorage.com
+    endpointURL: https://d5e88244bb931549c6c47ec6034f6a97.r2.cloudflarestorage.com
     s3Credentials:
       accessKeyId:
         name: r2-backup-credentials

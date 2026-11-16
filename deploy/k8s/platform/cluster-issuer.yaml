@@ -7,7 +7,7 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: admin@shop.example.com # expiry warnings go here
+    email: hadoda.shani@gmail.com # expiry warnings go here
     privateKeySecretRef:
       name: letsencrypt-account
     solvers:

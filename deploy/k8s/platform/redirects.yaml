@@ -26,10 +26,10 @@ spec:
     - name: public
       sectionName: https
   hostnames:
-    - www.shop.example.com
+    - www.hadoda-shani.co.il
   rules:
     - filters:
         - type: RequestRedirect
           requestRedirect:
-            hostname: shop.example.com
+            hostname: hadoda-shani.co.il
             statusCode: 301
