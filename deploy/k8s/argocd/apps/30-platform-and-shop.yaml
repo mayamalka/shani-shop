@@ -1,4 +1,4 @@
-# Wave -1: issuer, certificate, Gateway. Wave 0: secrets. Wave 1: the shop itself.
+# Wave -2: secrets (the platform's certificate needs the Cloudflare token). Wave -1: issuer, certificate, Gateway. Wave 1: the shop itself.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -26,7 +26,7 @@ metadata:
   name: shop-secrets
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   project: default
   source:
@@ -42,7 +42,7 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    managedNamespaceMetadata: # namespace "shani" is created here (wave 0) with these labels
+    managedNamespaceMetadata: # namespace "shani" is created here (wave -2) with these labels
       labels:
         shop.gateway/allowed: "true"
         pod-security.kubernetes.io/enforce: restricted

@@ -36,7 +36,7 @@ Job migrate (every Argo CD sync) · CronJob purge-photos (every 6 h)
 | `deploy/k8s/app/prod/` | Domain-specific values (`site.yaml`), image tags (bumped by CI), and `sealed/` (encrypted secrets) |
 | `.github/workflows/release.yml` | Runs after CI passes on `main`. It builds the arm64 images, pushes them to GHCR, and commits the new tags into `app/prod` |
 
-Sync order (Argo CD waves): Argo CD (-5) → Gateway API CRDs (-4) → sealed-secrets, cert-manager, CloudNativePG (-3) → barman-cloud plugin, Traefik (-2) → platform (-1) → secrets (0) → shop (1).
+Sync order (Argo CD waves): Argo CD (-5) → Gateway API CRDs (-4) → sealed-secrets, cert-manager, CloudNativePG (-3) → barman-cloud plugin, Traefik, secrets (-2) → platform (-1) → shop (1). The secrets sync before the platform because its certificate needs the Cloudflare DNS token.
 Inside the shop app the order is: database (0) → migrate Job (1) → api and web (2).
 
 ## Placeholders to replace before the first deploy
